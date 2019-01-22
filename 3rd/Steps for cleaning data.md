@@ -18,3 +18,12 @@ Explore for understanding the structure of the data
 
 - **hist()** #View histogram of a single variable
 - **plot()** #Vies plot of two variables
+
+# Summary
+- Inspected the data
+- Tidied the data
+- Improve data representations
+- Dealt with incorrect variable codings
+- Found and dealt with missing data
+- Identified and corrected errors
+- Visualized the result
