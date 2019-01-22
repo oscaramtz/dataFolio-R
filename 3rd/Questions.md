@@ -40,3 +40,9 @@ https://www.coursera.org/learn/data-scientists-tools
   -- Usually modeled by a deterministic set of quations (physical/engineering science)
   -- Generally the random component of the data is measurement error
   -- If the equiations are known but the parameters are not, they may be inferred with data analysis
+  
+  ## The data is the second most important thing
+  - The most important thing in data science is the question
+  - The second most important thing is the data
+  - Often the data will limit or enable the questions
+  - But having data can't save you if you don't have a question
