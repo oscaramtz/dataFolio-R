@@ -30,5 +30,13 @@ https://www.coursera.org/learn/data-scientists-tools
   -- Accurate prediction depends heavily on measuring the right variables
   -- Although there are better and worse predictions models, more data and a simple model really well
   -- Prediction is very hard, especially about the future references
-- Causal (Goal: )
-- Mechanistic
+- Causal (Goal: To find out what happends yo one variable when you make another variable change)
+  -- Usually ramdomized studies are required to identify causation
+  -- There are approaches to inferring causation in non-randomized studies, but they are complicated and sensitive to assumptions
+  -- Causal relationship are usually identifies as average effects, but may not apply to every individual
+  -- Causal models are usually the gold standart for data analysis
+- Mechanistic (Goal: Understand the exact changes in variables that lead to changes in other variables for individual objects)
+  -- Incredibly hard to infer, except in simple situations
+  -- Usually modeled by a deterministic set of quations (physical/engineering science)
+  -- Generally the random component of the data is measurement error
+  -- If the equiations are known but the parameters are not, they may be inferred with data analysis
