@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 From.
 https://www.coursera.org/learn/data-scientists-tools
 
-###Types of Data Science Questions (order of difficulty)
+##Types of Data Science Questions (order of difficulty)
 - Descriptive (Goal: describe a set of data)
   --Is the first kind of data analysis performed
   -- Commonly applied to census data
