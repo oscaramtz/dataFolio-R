@@ -1,4 +1,4 @@
-# explore the data:
+# Explore the data:
 Explore for understanding the structure of the data
 
 - **class()** - to find the class of data object
