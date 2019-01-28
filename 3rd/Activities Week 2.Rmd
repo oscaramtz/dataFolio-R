@@ -30,7 +30,7 @@ complete <- function(directory, id = 1:332){
   files <- list.files(directory, full.names = TRUE)
   pt <- lapply(files[id], read.csv)
   mpt <- do.call(rbind, pt)
-  nrow(mpt[complete.cases(mpt),])
+  tapply(mpt, mpt[ID = id], nrow)
 }
 complete(dir, c(2, 4, 8, 10, 12))
 complete(dir, 30:25)
