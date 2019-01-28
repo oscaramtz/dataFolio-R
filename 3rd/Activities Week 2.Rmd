@@ -1,0 +1,39 @@
+---
+title: "Second Week Activities"
+author: "OscarAMtz"
+date: "28 de enero de 2019"
+output: html_document
+---
+## Second Week
+##
+## directory used: "c:/Users/OscarAMtz/Desktop/specdata"
+### First Assingment
+```{r}
+dir <- "c:/Users/OscarAMtz/Desktop/specdata"
+
+pollutantmean <- function(directory, pollutant, id = 1:332){
+  files <- list.files(directory, full.names = TRUE)
+  pt <- lapply(files[id], read.csv)
+  mpt <- do.call(rbind, pt)
+  mean(mpt[,pollutant == names(mpt)], na.rm = TRUE)
+}
+
+pollutantmean(dir, "sulfate", id = 1:10)
+pollutantmean(dir, "nitrate", 70:72)
+pollutantmean(dir, "nitrate", 23)
+```
+
+### Second assigment
+
+```{r}
+complete <- function(directory, id = 1:332){
+  files <- list.files(directory, full.names = TRUE)
+  pt <- lapply(files[id], read.csv)
+  mpt <- do.call(rbind, pt)
+  nrow(mpt[complete.cases(mpt),])
+}
+complete(dir, c(2, 4, 8, 10, 12))
+complete(dir, 30:25)
+complete(dir, 3)
+```
+
