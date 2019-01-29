@@ -39,7 +39,7 @@ complete <- function(directory, id = 1:332){
   }
   colnames(output)  <- c("id","nobs")
   output
-  }
+}
 complete(dir, c(2, 4, 8, 10, 12))
 complete(dir, 30:25)
 complete(dir, 3)
