@@ -12,6 +12,7 @@ output: html_document
 dir <- "c:/Users/OscarAMtz/Desktop/specdata"
 
 pollutantmean <- function(directory, pollutant, id = 1:332){
+  ## Reading Data
   files <- list.files(directory, full.names = TRUE)
   pt <- lapply(files[id], read.csv)
   mpt <- do.call(rbind, pt)
@@ -28,6 +29,7 @@ pollutantmean(dir, "nitrate", 23)
 ```{r}
 dir <- "c:/Users/OscarAMtz/Desktop/specdata"
 complete <- function(directory, id = 1:332){
+  ## Reading data
   files <- list.files(directory, full.names = TRUE)
   pt <- lapply(files[id], read.csv)
   mpt <- do.call(rbind, pt)
@@ -55,7 +57,7 @@ complete(dir, 3)
 ```{r}
 dir <- "c:/Users/OscarAMtz/Desktop/specdata"
 corr <- function(directory, threshold = 0){
-  ## Getting list names
+  ## Getting IDs complete cases number of rows
   ccases <- complete(directory)
   mtthres <- ccases[ccases$nobs > threshold,"id"]
   ## Reading data
@@ -89,24 +91,67 @@ head(cr)
 summary(cr)
 length(cr)
 ```
-  
-```{r}
-files <- list.files(dir, full.names = TRUE)
-  pt <- lapply(files, read.csv)
-  mpt <- do.call(rbind, pt)
-  ccases <- complete(dir)
-  mtthres <- ccases[ccases$nobs >= 150,"id"]
-  str(mtthres)
-  as.factor(mtthres)
-  mptcc_id <- which(complete.cases(mpt))
-  mpt_c <- mpt[mptcc_id,]
-  o <- as.vector(NA)
-  for (i in mtthres){
-  o <- c(o,which(mpt_c$ID == mtthres[i]))
-  }
-  
-  mtthres_id <- mpt_c[o,] 
+<<<<<<< HEAD
 
-  mptcc <- mpt_c[,]
-  mptcc_corr <- vector()
+## Quiz
+#1
+```{r}
+pollutantmean(dir, "sulfate", 1:10)
 ```
+#2
+```{r}
+pollutantmean(dir, "nitrate", 70:72)
+```
+#3
+```{r}
+pollutantmean(dir, "sulfate", 34)
+```
+#4
+```{r}
+pollutantmean(dir, "nitrate")
+```
+#5
+```{r}
+cc <- complete(dir, c(6, 10, 20, 34, 100, 200, 310))
+print(cc$nobs)
+```
+#6
+```{r}
+cc <- complete(dir, 54)
+print(cc$nobs)
+```
+#7
+```{r}
+set.seed(42)
+cc <- complete(dir, 332:1)
+use <- sample(332, 10)
+print(cc[use, "nobs"])
+```
+#8
+```{r}
+cr <- corr(dir)                
+cr <- sort(cr)                
+set.seed(868)                
+out <- round(cr[sample(length(cr), 5)], 4)
+print(out)
+```
+#9
+```{r}
+cr <- corr(dir, 129)                
+cr <- sort(cr)                
+n <- length(cr)                
+set.seed(197)                
+out <- c(n, round(cr[sample(n, 5)], 4))
+print(out)
+```
+#10
+```{r}
+cr <- corr(dir, 2000)                
+n <- length(cr)                
+cr <- corr(dir, 1000)                
+cr <- sort(cr)
+print(c(n, round(cr, 4)))
+```
+
+=======
+>>>>>>> 4256aa5aa22cfac80b8f97ea7278c7cc47061e4d
