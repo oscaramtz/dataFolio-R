@@ -26,6 +26,7 @@ pollutantmean(dir, "nitrate", 23)
 ### Second assigment
 
 ```{r}
+dir <- "c:/Users/OscarAMtz/Desktop/specdata"
 complete <- function(directory, id = 1:332){
   files <- list.files(directory, full.names = TRUE)
   pt <- lapply(files[id], read.csv)
@@ -43,26 +44,69 @@ complete <- function(directory, id = 1:332){
 complete(dir, c(2, 4, 8, 10, 12))
 complete(dir, 30:25)
 complete(dir, 3)
+
+##Solución alternativa
+
 ```
+
 
 ### Third assignment 
 
 ```{r}
-complete <- function(directory, id = 1:332){
+dir <- "c:/Users/OscarAMtz/Desktop/specdata"
+corr <- function(directory, threshold = 0){
+  ## Getting list names
+  ccases <- complete(directory)
+  mtthres <- ccases[ccases$nobs > threshold,"id"]
+  ## Reading data
   files <- list.files(directory, full.names = TRUE)
-  pt <- lapply(files[id], read.csv)
+  pt <- lapply(files, read.csv)
   mpt <- do.call(rbind, pt)
-  output <- data.frame()
-  for (i in id){
-    idmpt <- mpt[mpt$ID == i,]
-    compt <- complete.cases(idmpt)
-    rows <- sum(compt)
-    output <- rbind(output, c(i, rows))
-  }
-  colnames(output)  <- c("id","nobs")
-  output
+  ## Complete cases
+  mpt_cc <- mpt[complete.cases(mpt),]
+  correlation <- vector()
+      for (i in mtthres){
+          mptcc_fcor <- cor(mpt_cc[mpt_cc$ID == i,2], mpt_cc[mpt_cc$ID == i,3])
+          correlation <- c(correlation, mptcc_fcor)
+        }
+  correlation
 }
-complete(dir, c(2, 4, 8, 10, 12))
-complete(dir, 30:25)
-complete(dir, 3)
+
+cr <- corr(dir, threshold = 150)
+head(cr)
+summary(cr)
+length(cr)
+cr <- corr(dir, threshold = 400)
+head(cr)
+summary(cr)
+length(cr)
+cr <- corr(dir, threshold = 5000)
+head(cr)
+summary(cr)
+length(cr)
+cr <- corr(dir, 0)
+head(cr)
+summary(cr)
+length(cr)
+```
+  
+```{r}
+files <- list.files(dir, full.names = TRUE)
+  pt <- lapply(files, read.csv)
+  mpt <- do.call(rbind, pt)
+  ccases <- complete(dir)
+  mtthres <- ccases[ccases$nobs >= 150,"id"]
+  str(mtthres)
+  as.factor(mtthres)
+  mptcc_id <- which(complete.cases(mpt))
+  mpt_c <- mpt[mptcc_id,]
+  o <- as.vector(NA)
+  for (i in mtthres){
+  o <- c(o,which(mpt_c$ID == mtthres[i]))
+  }
+  
+  mtthres_id <- mpt_c[o,] 
+
+  mptcc <- mpt_c[,]
+  mptcc_corr <- vector()
 ```
