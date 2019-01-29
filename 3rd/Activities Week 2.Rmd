@@ -89,24 +89,3 @@ head(cr)
 summary(cr)
 length(cr)
 ```
-  
-```{r}
-files <- list.files(dir, full.names = TRUE)
-  pt <- lapply(files, read.csv)
-  mpt <- do.call(rbind, pt)
-  ccases <- complete(dir)
-  mtthres <- ccases[ccases$nobs >= 150,"id"]
-  str(mtthres)
-  as.factor(mtthres)
-  mptcc_id <- which(complete.cases(mpt))
-  mpt_c <- mpt[mptcc_id,]
-  o <- as.vector(NA)
-  for (i in mtthres){
-  o <- c(o,which(mpt_c$ID == mtthres[i]))
-  }
-  
-  mtthres_id <- mpt_c[o,] 
-
-  mptcc <- mpt_c[,]
-  mptcc_corr <- vector()
-```
