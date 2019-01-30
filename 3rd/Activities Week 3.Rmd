@@ -1,0 +1,21 @@
+---
+title: "Activities Week 3"
+author: "OscarAMtz"
+date: "30 de enero de 2019"
+output: html_document
+---
+## Debbuging R
+
+- traceback : prints out the function call stack after an error occurs; does nothing if there´s no error
+
+- debug : flags a function for "debug" mode which allows you tu step through execution of a function one line at a time
+
+- browser :  suspends the execution of a function wherever it is called and puts the function in debug mode
+
+- trace : allows you to insert debbuguing code into a function a specefic places
+
+- recover : allows you to modify the error behavior so that you can browse the function call stack
+
+
+debug(ls)
+ls()
