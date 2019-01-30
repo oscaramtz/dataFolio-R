@@ -92,6 +92,7 @@ summary(cr)
 length(cr)
 ```
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 ## Quiz
 #1
@@ -153,5 +154,7 @@ cr <- sort(cr)
 print(c(n, round(cr, 4)))
 ```
 
+=======
+>>>>>>> 4256aa5aa22cfac80b8f97ea7278c7cc47061e4d
 =======
 >>>>>>> 4256aa5aa22cfac80b8f97ea7278c7cc47061e4d
