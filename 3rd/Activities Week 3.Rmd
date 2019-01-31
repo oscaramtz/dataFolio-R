@@ -16,6 +16,93 @@ output: html_document
 
 - recover : allows you to modify the error behavior so that you can browse the function call stack
 
+### Diferent ways to loop functions in listed objects with the apply family
 
-debug(ls)
-ls()
+```{r}
+with(mtcars, tapply(mpg, cyl, mean))
+tapply(mtcars$mpg, mtcars$cyl, mean)
+sapply(split(mtcars$mpg, mtcars$cyl), mean)
+
+apply(iris[iris$Species == "virginica", 1:4], 2, mean)
+```
+
+## Example for scoping
+
+```{r}
+makeVector <- function(x = numeric()) {
+        m <- NULL
+        set <- function(y) {
+                x <<- y
+                m <<- NULL
+        }
+        get <- function() x
+        setmean <- function(mean) m <<- mean
+        getmean <- function() m
+        list(set = set, get = get,
+             setmean = setmean,
+             getmean = getmean)
+}
+
+makeVector(9)
+
+cachemean <- function(x, ...) {
+        m <- x$getmean()
+        if(!is.null(m)) {
+                message("getting cached data")
+                return(m)
+        }
+        data <- x$get()
+        m <- mean(data, ...)
+        x$setmean(m)
+        m
+}
+x <- c(3,3.2,3.5,3.6)
+vectormean <- makeVector()
+```
+
+## inverse of a matrix
+
+```{r}
+## Element for matrix structure
+trn <- matrix(c(3,3.2,3.5,3.6), 2,2)
+bw_trn_vec <- as.vector(trn)[length(trn):1]
+matrix(bw_trn_vec, 2,2) 
+### Matrix 2x2 example
+x <- c(1:4)
+dm <- sqrt(length(x))
+mtx2x2 <- matrix(x,nrow = dm, ncol = dm)
+matrix(as.vector(mtx2x2)[length(mtx2x2):1], dm, dm)
+matrix(c(rep((c(1,-1), dm), rep(c(-1,1), dm))), nrow = dm, ncol = dm)
+t(mtx2x2)
+
+### Matrix 3X3 example
+x <- c(1:9)
+dm <- sqrt(length(x))
+mtx3x3 <- matrix(x,nrow = dm, ncol = dm)
+matrix(as.vector(mtx3x3)[length(mtx3x3):1], dm, dm)
+matrix(rep(c(1,-1), dm^2), nrow = dm, ncol = dm)
+t(mtx3x3)
+### Matrix 4x4 example
+x <- (1:16)
+dm <- sqrt(length(x))
+mtx4x4 <- matrix(x,nrow = dm, ncol = dm)
+matrix(as.vector(mtx4x4)[length(mtx4x4):1], dm, dm)
+t(mtx4x4)
+
+
+
+
+x <- matrix(c(3,3.2,3.5,3.6),2,2)
+matriz <- makeMatrix()
+matriz$set(x)
+cachematrix(matriz)
+matriz$getmatrix(),
+### Store the matrx
+x <- c(3,3.2,3.5,3.6)
+trn <- matrix(c(3,3.2,3.5,3.6), 2,2)
+i_trn <- matrix(c(trn[2,2],trn[1,2]*-1,-1*trn[2,1],trn[1,1]),2,2)
+inv_trn <- (1/(trn[1,1]*trn[2,2]-trn[1,2]*trn[2,1]))*i_trn
+mat <- matrix(c(118.4, 135.2),2,1)
+matrix(c(sum(inv_trn[1,1:2]*mat), sum(inv_trn[2,1:2]*mat)),2,1)
+```
+

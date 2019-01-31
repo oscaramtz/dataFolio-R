@@ -1,0 +1,54 @@
+---
+title: "MakeMatrix Function"
+author: "OscarAMtz"
+date: "31 de enero de 2019"
+output: html_document
+---
+
+#Function Make Matrix inverted
+```{r setup, include=FALSE}
+## Initiate a set of functions that manage the matrix provided
+makeMatrix <- function(x = matrix()) {
+### Setting up the dummy object to store the inverted matrix
+        inv_m <- NULL
+### Programming the "set" subfunction to store in cache the objects
+        set <- function(y) {
+                x <<- y
+                inv_m <<- NULL
+        }
+### Programming the "get" for recovering the main matrix stored
+        get <- function() x
+        setInvertedM <- function(inverted) inv_m <<- inverted
+        getInvertedM <- function() inv_m
+        testInvertedM <- function() inv_m %*% x
+### Programming a list for managing the variables
+        list(set = set, get = get,
+             setInvertedM = setInvertedM,
+             getInvertedM = getInvertedM,
+             testInvertedM = testInvertedM)
+}
+cachematrix <- function(x, ...) {
+        inv_m <- x$getInvertedM()
+        if(!is.null(inv_m)) {
+                message("getting cached inverted matrix")
+                return(inv_m)
+
+                
+                
+                
+        }
+        data <- x$get()
+        inv_m <- solve(data)
+         x$setInvertedM(inv_m)
+        inv_m
+        
+}
+x <- matrix(c(3.0,3.2,3.5,3.6),2,2)
+mtx <- makeMatrix()
+mtx$set(x)
+mtx$get()
+cachematrix(mtx)
+mtx$testInvertedM()
+cachematrix(mtx)
+
+```
