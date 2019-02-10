@@ -1,0 +1,51 @@
+---
+title: "4th Quiz R-Programming"
+author: "OscarAMtz"
+date: "10 de febrero de 2019"
+output: html_document
+---
+#1
+```{r}
+best("SC", "heart attack")
+```
+#2
+```{r}
+best("NY", "pneumonia")
+```
+#3
+```{r}
+best("AK", "pneumonia")
+```
+#4
+```{r}
+rankhospital("NC", "heart attack", "worst")
+```
+#5
+```{r}
+rankhospital("WA", "heart attack", 7)
+```
+#6
+```{r}
+rankhospital("TX", "pneumonia", 10)
+```
+#7
+```{r}
+rankhospital("NY", "heart attack", 7)
+```
+#8
+```{r}
+r <- rankall("heart attack", 4)
+r["HI",]
+
+```
+#9
+```{r}
+r <- rankall("pneumonia", "worst")
+r["NJ",]
+
+```
+#10
+```{r}
+r <- rankall("heart failure", 10)
+r["NV",]
+```
