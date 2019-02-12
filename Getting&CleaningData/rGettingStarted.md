@@ -60,6 +60,7 @@ write.xlsx() ## same arguments
 install.package("XLConnect") ## has more options for writing and manipulatin Excel files
 ```
 
+```{R}
 Reading XML for "Extensible markup language" frequently used to store structured data, widely used in web apps
 - Tags, elements and attibutes
 
@@ -72,6 +73,8 @@ Reading XML for "Extensible markup language" frequently used to store structured
 -Attributes are components of the label
 -#<img src = "oscar.jpg" alt = "instructor"/>
 -#<step number = "3"> Connect A to B. </step>
+```
+XML Example
 ```{R}
 ##Read XML
 install.packages("XML")
@@ -87,3 +90,53 @@ xmlName(rootNode)
 
 xmlSApply(rootNode, xmlValue)
 ```
+XPath reading 
+```{R}
+/node Top level node
+//node Node at any leve
+node[@attr-name] Node with an attribute name
+node[@attr-name] Node with an attribute name attr-name = 'bob'
+
+xpathSApply(rootNode, "//name", xmlValue)
+
+## it will return the names
+
+xpathSApply(rootNode, "//price", xmlValue)
+
+## Example
+
+  fileUrl <- 'http://www.espn.com/nfl/team/schedule/_/name/bal/year/2016'
+  doc <- htmlTreeParse(fileUrl, useInternal=TRUE)
+
+  # score vector is straightforward, using <li> tag   
+  score <- xpathSApply(doc,"//li[@class='score']", xmlValue)
+
+  # game status is a bit more tricky, because there are two different types
+  # first, we combine the two classes in an R object
+  gameStatus <- c("//li[@class='game-status loss']","//li[@class='game-status win']")
+
+  # second, we use the object as the query string in xpathSApply()
+  result <- xpathSApply(doc,gameStatus,xmlValue)
+
+  opponent <- xpathSApply(doc, "//li[@class='team-name']", xmlValue)
+
+  # third, use a similar technique to extract game dates from the table, ignoring bye week
+  daysOfWeek <- c("//td['Sun,']","//td['Mon,']","//td['Thu,']","//td['Sat,']")
+  date <- grep("Sun,|Mon,|Thu,|Sat,",xpathSApply(doc,daysOfWeek,xmlValue),value=TRUE)
+
+  # finally, combine into a data frame and print
+  team <- rep("Baltimore Ravens",length(opponent))
+  scoresData <- data.frame(team,date,opponent,result)
+  scoresData
+```
+
+#Reading Json 
+```{R}
+install.packages("jsonlite")
+library(jsonlite)
+
+jsonData <- fromJSON("https://api.github.com/users/jfleek/repos")
+names(jsonData)
+names(json$owner)
+```
+
