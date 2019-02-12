@@ -63,15 +63,15 @@ install.package("XLConnect") ## has more options for writing and manipulatin Exc
 Reading XML for "Extensible markup language" frequently used to store structured data, widely used in web apps
 - Tags, elements and attibutes
 
---Tags correspond to general labels
----Start tags   <section>
----End tags     </section>
----Empty tags   <lie-breack />
+-Tags correspond to general labels
+-Start tags   #<section>
+-End tags     #</section>
+-Empty tags   #<lie-breack />
 -Elements are specific examples of tags
----<Greeting> Hello, world!!! </Greeting>
+-#<Greeting> Hello, world!!! </Greeting>
 -Attributes are components of the label
----<img src = "oscar.jpg" alt = "instructor"/>
----<step number = "3"> Connect A to B. </step>
+-#<img src = "oscar.jpg" alt = "instructor"/>
+-#<step number = "3"> Connect A to B. </step>
 ```{R}
 ##Read XML
 install.packages("XML")
