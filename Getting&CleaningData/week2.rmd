@@ -1,0 +1,78 @@
+
+```{R}
+install.packages("RMySQL")
+library(RMySQL)
+```
+## Try connection
+```{R}
+ucscDb <- dbConnect(MySQL(), user = "genome",
+                    host = "genome-mysql.cse.ucsc.edu")
+
+result <- dbGetQuery(ucscDb, "show databases;"); dbDisconnect(ucscDb)
+result
+```
+
+## Connecting to hg19
+```{R}
+hg19 <- dbConnect(MySQL(), 
+                    user = "genome",
+                    db = "hg19",
+                    host = "genome-mysql.cse.ucsc.edu")
+
+allTables <- dbListTables(hg19)
+dbDisconnect(hg19)
+length(allTables)
+allTables[1:5]
+```
+## HDF5 package
+```{R}
+source("http://bioconductor.org/biocLite.R")
+biocLite("rhdf5")
+
+library(rhdf5)
+created <= h5createFile("example.h5")
+created <- h5createGroup("example.h5", "foo")
+created <- h5createGroup("example.h5", "baa")
+created <- h5createGroup("example.h5", "foo/foobaa")
+h5ls("example.h5")
+```
+## Parsing with XML
+```{R}
+library(XML)
+url <- "http://scholar.google.com/citations?user=HI-I6C0AAAJ&hl=en"
+html <-htmlTreeParse(url, useInternalNodes = TRUE)
+xpathSApply(html, "//title", xmlValue)
+
+xpathSApply(html, "//td[@id='col-citedby']", xmlValue)
+```
+## Read Data from Web
+```{R}
+con <- url("http://scholar.google.com/citations?user=HI-I6C0AAAJ&hl=en")
+htmlCode <- readLines(con)
+
+
+close(con)
+head(htmlCode)
+
+install.packages("httr")
+library(httr)
+
+pg2 <- GET("http://httpbin.org/basic-auth/user/passwd",
+            autenticate("user", "passwd"))
+pg2
+names(pg2)
+```
+
+## API Twitter
+
+```{R}
+## API from application programming interfaces
+library(httr)
+myapp <- oauth_app("twitter",
+                   key = "YourKey",
+                   secret = "YourSecret")
+sig <- sign_oauth1.0(myapp,
+                     token = "YourToken",
+                     token_secret = "YourTokenSecret")
+homeTL <- GET("https://api.twitter.com/1.1/statuses/home_timeline.json", sig)
+```
