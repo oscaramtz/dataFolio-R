@@ -11,7 +11,7 @@ Operator| Description
 ---|---
 +|Addition
 – |Subtraction
-*	|Multiplication
+`*`	|Multiplication
 / |Division
 ^ |Exponent
 %% |Modulus (Remainder from division)
