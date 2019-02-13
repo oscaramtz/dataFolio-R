@@ -35,9 +35,8 @@ summary(df)
 xt <- xtabs(Freq ~ Gender + Admit, data = df)
 xt
 ```
-
- |Admit| 
----|---|---
+###Admit
 Gender|Admitted|Rejected
+---|---|---
 Male|1198|1493
 Female|557|1278
