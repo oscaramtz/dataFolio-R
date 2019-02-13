@@ -88,3 +88,9 @@ library(rgeos)
 install.packages("raster")
 library(raster)
 ```
+
+## sql Querris with df 
+```{R}
+install.packages("sqldf")
+library(sqldf)
+```
