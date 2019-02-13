@@ -18,3 +18,25 @@ Operator| Description
 %/% |Integer Division
 
 
+## Subsetting obey to logical commands if true will be called but if is false it will not be called
+
+table(restData$zipCode %in% c("21212" ,"21213"))
+
+
+### retunrs a table with the row values if the condition is satisficed
+restData[restData$zipCode %in% c("21212" ,"21213"),]
+
+## Cross Tabs
+```{R}
+data("UCBAdmissions")
+df <- as.data.frame(UCBAdmissions)
+summary(df)
+
+xt <- xtabs(Freq ~ Gender + Admit, data = df)
+xt
+```
+
+ |Admit| 
+Gender|Admitted|Rejected
+Male|1198|1493
+Female|557|1278
