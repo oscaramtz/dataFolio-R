@@ -42,3 +42,66 @@ Gender| Admitted| Rejected
 ---|---|---
 Male|1198|1493
 Female|557|1278
+
+
+## Flat Tables summarize the data 
+```{R}
+warpbreaks$replicate <- rep(1:9, len = 54)
+xt <- xtabs(breaks ~ ., data = warpbreaks)
+ftable(xt)
+```
+
+## Creating new variables
+
+- Missingness indicators
+- "Cutting up" quantitative variables
+- Applying transforms
+
+```{R}
+if(!exists("./data")){dir.create("./data")}
+url <- "https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD"
+download.file(url, destfile = "./data/restaurants.csv")
+restData <- read.csv("./data/restaurants.csv")
+
+restData$nearMe <- restData$neighborhood %in% c("Roland Park", "Homeland")
+table(restData$nearMe)
+
+restData$zipWrong <- ifelse(restData$zipCode < 0, TRUE, FALSE)
+table(restData$zipWrong, restData$zipCode < 0)
+
+restData$ZipGroups <- cut(restData$zipCode, breaks = quantile(restData$zipCode))
+table(restData$zipGroups)
+
+## Create Factor variables
+restData$zcf <- factor(restData$zipCode)
+
+```
+
+## Reshape data
+###Principles for tidy data
+- Each variable forms a column
+- Each observation forms a row
+- Each table/file stores data about one kind of observation (people/hospital)
+
+### MTCars example
+```{R}
+mtcars$carname <- rownames(mtcars)
+carMelt <- melt(mtcars, id = c("carname", "gear", "cyl"), measure.vars = c("mpg", "hp"))
+head(carMelt, 3)
+
+##Casting data Frames
+cylData <- dcast(carMelt, cyl ~ variable)
+
+cylData <- dcast(carMelt, cyl ~ variable, mean)
+cylData
+```
+
+### InsectSprays example
+```{R}
+head(InsectSprays)
+
+tapply(InsectSprays$count, InsectSprays$spray, sum)
+
+library(dplyr)
+ddply(InsectSprays, .(spray), summarize, sum = sum(count))
+```
