@@ -76,3 +76,15 @@ sig <- sign_oauth1.0(myapp,
                      token_secret = "YourTokenSecret")
 homeTL <- GET("https://api.twitter.com/1.1/statuses/home_timeline.json", sig)
 ```
+
+## Reading GIS data
+```{R}
+install.packages("rdgal")
+library(rdgal)
+
+install.packages("rgeos")
+library(rgeos)
+
+install.packages("raster")
+library(raster)
+```
