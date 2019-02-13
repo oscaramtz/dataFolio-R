@@ -7,24 +7,29 @@ x <- x[sample(1:5),]; x$var2[c(1,3)] = NA
 x
 ```
 
-|Operator	|Description
+|Operator	  |Description
+|-----------|----------------------------------|
+|+	        |Addition
+|–	        |Subtraction
+|*	        |Multiplication
+|/	        |Division
+|^	        |Exponent
+|%%	        |Modulus (Remainder from division)
+|%/%	      |Integer Division
 
-|+	      |Addition
-|–	      |Subtraction
-|*	      |Multiplication
-|/	      |Division
-|^	      |Exponent
-|%%	      |Modulus (Remainder from division)
-|%/%	    |Integer Division
 
-
-```{r table2, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
-tabl <- "  # simple table creation here
-| Tables        | Are           | Cool  |
-|---------------|:-------------:|------:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
-"
-cat(tabl) # output the table in a format good for HTML/PDF/docx conversion
+```{r table-simple, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+require(pander)
+panderOptions('table.split.table', Inf)
+set.caption("My great data")
+my.data <- " # replace the text below with your table data
+  Tables        | Are           | Cool
+  col 3 is      | right-aligned | $1600 
+  col 2 is      | centered      |   $12 
+  zebra stripes | are neat      |    $1"
+df <- read.delim(textConnection(my.data),header=FALSE,sep="|",strip.white=TRUE,stringsAsFactors=FALSE)
+names(df) <- unname(as.list(df[1,])) # put headers on
+df <- df[-1,] # remove first row
+row.names(df)<-NULL
+pander(df, style = 'rmarkdown')
 ```
