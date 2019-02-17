@@ -1,0 +1,110 @@
+```{R}
+### quiz
+
+src <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+agricultureLogical <- read.csv(src)
+
+agrLog <- tbl_df(agricultureLogical)
+
+### What are the first 3 values that result?
+log <- which(agrLog$ACR == 3 & agrLog$AGS == 6)
+log[1:3]
+
+getwd()
+
+## 2
+install.packages("jpeg")
+library(jpeg)
+?jpeg
+img <- readJPEG("getdata_jeff (1).jpg", native = TRUE)
+quantile(img, probs = c(0.3, 0.8))
+
+## 3
+src3.1 <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv"
+src3.2 <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv"
+Q3.1 <- read.csv(src3.1)
+Q3.2 <- read.csv(src3.2)
+Q3.1 <- Q3.1[-c(1:4),]
+Q3.1 <- Q3.1[1:190,]
+Q3.2 <- tbl_df(Q3.2)
+
+head(Q3.1, 13)
+head(Q3.2)
+
+Q3.1$Gross.domestic.product.2012 <- as.numeric(Q3.1$Gross.domestic.product.2012)
+Q3.1 <- mutate(Q3.1, rank = as.numeric(Gross.domestic.product.2012))
+Q3.1 <- Q3.1[-c(1:3),]
+Q3.1[2:15,]
+sum(Q3.2$CountryCode == "KNA")
+
+
+sum(as.vector(Q3.1[,1]) %in% as.vector(Q3.2[,1]))
+## matches 189
+
+HighGroup <- as.vector(Q3.2[Q3.2$Income.Group == "High income: OECD",1])
+HighNonOcde <- as.vector(Q3.2[Q3.2$Income.Group == "High income: nonOECD",1])
+for (i in HighGroup){
+  as.vector(Q3.1[,1]) == i
+}
+  
+HighGroup1 <- as.vector(Q3.1[,1]) %in% HighGroup
+HighNonOcde1 <- as.vector(Q3.1[,1]) %in% HighNonOcde
+GDP <- (Q3.1[,2])
+mean(as.numeric(GDP[1:190]), na.rm = TRUE)
+GDP <- GDP[1:190]
+mean(parse_number(as.vector(GDP[HighGroup1])))
+mean(parse_number(as.vector(GDP[HighNonOcde1])))
+Q3.1$rank <- as.numeric(as.vector(Q3.1[,2]))
+z <- as.vector(Q3.1[1:38,1])
+as.vector(Q3.1[,1]) %in% 
+quantile(as.numeric(as.vector(Q3.1[,2])), probs = c(0,0.2,0.4,0.8,0.8,1))
+
+
+LMI <- as.vector(Q3.2[Q3.2$Income.Group == "Lower middle income",1])
+sum(LMI %in% z)
+sum(LMI %in% as.vector(Q3.1[,1]))
+group_by(Q3.2,Income.Group)
+
+names(Q3.1)[1] <- "CountryCode"
+Q3.2
+Q <- merge(Q3.1, Q3.2, by.x = 1, by.y = 1, all.x = TRUE)
+
+Q3.2 %>%
+  group_by(Income.Group) %>% 
+  select(CountryCode, Income.Group) %>%
+  bind_cols(Q3.1)
+  print
+
+[na.omit(group_by(Q3.2$Income.Group)(match(Q3.2$CountryCode, Q3.1$X[1:38]))),]
+  Q[Q$rank %in% 1:38 & Q$Income.Group == "Lower middle income",1:5]
+  
+  
+  
+### Quiz 4
+  
+  idaho_url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+  idaho <- read.csv(idaho_url)
+  #1
+  splitedNamesIdaho <- strsplit(names(idaho), "wgtp")
+  splitedNamesIdaho[123]
+  #2
+  Q3.1$gdp.num <- gsub(Q3.1$X.3, pattern = ",", replacement = "")
+  mean(as.numeric(Q3.1$gdp.num))
+  #3
+  grep("^United",Q3.1$X.2),3
+  #4
+  FedStats_url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv"
+  FedStats <- read.csv(FedStats_url)
+  head(FedStats)
+  sum(grepl(FedStats$Special.Notes, pattern = "^Fiscal year end: June 30"))
+  #5
+  install.packages("quantmod")
+  library(quantmod)
+  amzn = getSymbols("AMZN",auto.assign=FALSE)
+  sampleTimes = index(amzn)
+  class(sampleTimes)
+  sum(grepl(sampleTimes, pattern = "^2012")) 
+  sum(sampleTimes[grepl(sampleTimes, pattern = "^2012")] %in% wday(2, label = TRUE))
+  sampleTime2012 <- grep(sampleTimes, pattern = "^2012")
+  sum(wday(sampleTimes[sampleTime2012]) == 2)
+```
