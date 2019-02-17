@@ -87,3 +87,21 @@ sat %>%
         prop = count / total) %>%
   print
 ```
+## XTabs
+
+```{R}
+data("UCBAdmissions")
+df <- as.data.frame(UCBAdmissions)
+summary(df)
+sum(df[df$Admit == "Rejected", "Freq"])
+
+xt <- xtabs(Freq ~ Gender + Admit, data = df)
+xtabs(Freq ~ Gender + Admit, df)
+ftable(df)
+
+
+warpbreaks <- warpbreaks[,1:3]
+warpbreaks$replicate <- rep(1:9, len = 54)
+xt <- xtabs(breaks ~ ., data = warpbreaks)
+ftable(xt)
+```
