@@ -54,5 +54,18 @@ it is preferred to read the RedEx support page, can be enough with the cheatShee
 
 [RegExCheatsheet.pdf](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
 
+- . character {dot}, search for any character in the position that is placed
+- | character {pipe}, identifies one OR other expression, it can be evaluate as an OR
+- ^ character {pyramid quote}, referes to search at the begining of a text line
+- [Aa] brackets {[]}, the hard brackets are used to serch different characters in the same position. In this case is Capital A an lowercase a
+- * repeat the character any number including none
+- + repeat the character at least one of the item
+- \ use of foward slash supress the colon effect
+
+
+# Example 
+
+[0-9]+(.*)[0-9]+ Means := at least one number, follow by any number of characters, follow by at least one number
+[Bb]ush( +[^ ]+ +){1, 5} debate Means := search bush or Bush follow by at least one space, follow by somthing that is not a space, follow by at least one space between 1 to 5 times follow by the word debate
 
 
