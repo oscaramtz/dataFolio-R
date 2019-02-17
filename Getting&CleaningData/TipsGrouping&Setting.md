@@ -1,4 +1,4 @@
-#Summarize
+# Summarize
 
 ```{R}
 # that you really understand what is going on.
@@ -64,7 +64,7 @@ result3 <-
 # Print result to console
   print(result3)
   ```
-### Chainging
+## Chainging
 
 ```{R}
 cran %>%
@@ -75,7 +75,7 @@ cran %>%
   # Your call to arrange() goes here
 ```
 
-### Grouping
+## Grouping
 
 ```{R}
 sat %>%
