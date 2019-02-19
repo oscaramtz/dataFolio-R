@@ -1,4 +1,4 @@
-# Exploratory Data Analysis Checklist
+# Exploratory Data Analysis
 1. Formulate your question
 2. Read in your data
 3. Check the packaging
