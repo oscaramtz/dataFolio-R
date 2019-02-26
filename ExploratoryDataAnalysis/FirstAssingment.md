@@ -34,6 +34,7 @@ with(hPowerCons_subset,
           xlab = "Global Active Power (Kilowatts)"))
 dev.copy(device = png,"plot1.png")
 
+dev.off()
 
 ## Plot 2
 with(hPowerCons_subset, 
@@ -44,6 +45,8 @@ with(hPowerCons_subset,
        xlab = "",  
        type = "l"))
 dev.copy(device = png,"plot2.png")
+
+dev.off()
 
 ## plot 3
 with(hPowerCons_subset, 
@@ -75,7 +78,7 @@ legend("topright",
        )
 
 dev.copy(device = png,"plot3.png")
-
+dev.off()
 ## Plot 4
 #layout (1,1)
 par(mfrow = c(2, 2))
@@ -134,6 +137,7 @@ with(hPowerCons_subset,
        type = "l")
      )
 dev.copy(device = png,"plot4.png")
+dev.off()
 ```
 
 ## Best example for subseting rows
