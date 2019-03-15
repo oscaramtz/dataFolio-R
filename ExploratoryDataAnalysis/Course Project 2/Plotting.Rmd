@@ -1,0 +1,152 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+1.  Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the **base** plotting system, make a plot showing the _total_ PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+```{R echo=FALSE}
+list.files("./exdata_data_NEI_data/")
+library(ggplot2)
+
+## loading the paths
+ClassCodePath <- list.files("./exdata_data_NEI_data/", full.names = TRUE)[1]
+SummaryPath <- list.files("./exdata_data_NEI_data/", full.names = TRUE)[2]
+
+SCC <- readRDS(ClassCodePath)
+NEI <- readRDS(SummaryPath)
+
+sumEmissions <- tapply(NEI$Emissions, 
+                       NEI$year, 
+                       sum)
+
+#png('plot1.png', width=480, height=480)
+
+plot(names(sumEmissions), 
+     sumEmissions, 
+     type = "l", 
+     xlab = "Year", 
+     ylab = "Total emission tons", 
+     main = "Total of PM2.5 emission per year"
+     )
+
+
+#dev.off()
+
+```
+
+2.  Have total emissions from PM2.5 decreased in the **Baltimore City**, Maryland (`fips == "24510"`) from 1999 to 2008? Use the **base** plotting system to make a plot answering this question.
+
+```{R echo=FALSE}
+list.files("./exdata_data_NEI_data/")
+
+BaltimoreEmissions <- subset(NEI, subset = NEI$fips == "24510")
+
+sumBaltimoreEms <- tapply(BaltimoreEmissions$Emissions,
+                          BaltimoreEmissions$year,
+                          sum)
+
+plot(names(sumBaltimoreEms),
+     sumBaltimoreEms,
+     type = "l",
+     xlab = "Year",
+     ylab = "Total PM2.5 emission [tons]",
+     main = "Total PM2.5 emissions in Baltimor City, 1999 - 2008"
+)
+```
+
+3.  Of the four types of sources indicated by the `type` (point, nonpoint, onroad, nonroad) variable, which of these four sources have seen decreases in emissions from 1999–2008 for **Baltimore City**? Which have seen increases in emissions from 1999–2008? Use the **ggplot2** plotting system to make a plot answer this question.
+
+```{R echo=FALSE}
+BaltimoreEmissions <- subset(NEI, subset = NEI$fips == "24510")
+BaltimoreEmsByType <- aggregate(BaltimoreEmissions["Emissions"], list(type=BaltimoreEmissions$type, year = BaltimoreEmissions$year), sum)
+
+
+ggplot(BaltimoreEmsByType, aes(year, Emissions, color = type))+
+  geom_point(alpha = 0.4)+
+  geom_line(alpha = 0.7)+
+  ggtitle("Total PM2.5 Emissions in Baltimore per Type, 1999-2008")
+```
+
+4.  Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
+
+```{R echo=FALSE}
+a <- 0
+for (i in seq_along(names(SCC))){a <- c(a, grep("[Cc]oal", SCC[,i]))}
+uniqueA <- unique(a)
+coalRelatedRows <- uniqueA[-1]
+coalRelatedSCC <- as.character(SCC[coalRelatedRows, "SCC"])
+coalRelatedEmissions <- NEI[NEI$SCC %in% coalRelatedSCC,]
+
+CoalRelatedESum <- aggregate(coalRelatedEmissions["Emissions"],
+                             list(year = coalRelatedEmissions$year),
+                             sum)
+
+ggplot(CoalRelatedESum, aes(year, Emissions, label = round(Emissions, digits = 0)))+
+  geom_point(alpha = 0.4, color = "Black")+
+  geom_line(alpha = 0.7, color = "Darkblue")+
+  geom_text(check_overlap = TRUE, vjust = 1.5, hjust = 0.4)+
+  xlab("Year")+
+  ylab("Coal related PM2.5 emissions [tons]")+
+  ggtitle("Total PM2.5 Coal combustion-related emissions in the U.S., 1999-2008")
+```
+
+5.  How have emissions from motor vehicle sources changed from 1999–2008 in **Baltimore City**?
+
+```{R echo=FALSE}
+BaltimoreEmissions <- subset(NEI, subset = NEI$fips == "24510")
+
+b <- 0
+##for (i in seq_along(names(SCC))){b <- c(b, grep("[mM]otor", SCC[,i]))}
+for (i in seq_along(names(SCC))){b <- c(b, grep("[vV]ehicle", SCC[,i]))}
+uniqueb <- unique(b)
+VehicleRelatedRows <- uniqueb[-1]
+VehicleRelatedSCC <- as.character(SCC[VehicleRelatedRows, "SCC"])
+VehicleRelatedEmissions <- BaltimoreEmissions[BaltimoreEmissions$SCC %in% VehicleRelatedSCC,]
+
+VehicleRelatedEmSum <- aggregate(VehicleRelatedEmissions["Emissions"],
+                             list(year = VehicleRelatedEmissions$year),
+                             sum)
+
+ggplot(VehicleRelatedEmSum, aes(year, Emissions, label = round(Emissions, digits = 0)))+
+  geom_point(alpha = 0.4, color = "Black")+
+  geom_line(alpha = 0.7, color = "Darkblue")+
+  geom_text(check_overlap = TRUE, vjust = 1.5, hjust = 0.4)+
+  xlab("Year")+
+  ylab("Coal related PM2.5 emissions [tons]")+
+  ggtitle("Total PM2.5 Vehicle-related emissions in Baltimore city, 1999-2008")
+```
+
+6.  Compare emissions from motor vehicle sources in Baltimore City with emissions from motor vehicle sources in **Los Angeles County**, California (`fips == "06037"`). Which city has seen greater changes over time in motor vehicle emissions?
+
+```{R echo=FALSE}
+#BaltimoreEmissions <- subset(NEI, subset = NEI$fips == "24510")
+#LosAngelesEmissions <- subset(NEI, subset = NEI$fips == "06037")
+BalLACEmissions <- subset(NEI, subset = NEI$fips == "06037" | NEI$fips == "24510")
+c <- 0
+##for (i in seq_along(names(SCC))){b <- c(b, grep("[mM]otor", SCC[,i]))}
+for (i in seq_along(names(SCC))){c <- c(c, grep("[vV]ehicle", SCC[,i]))}
+uniquec <- unique(c)
+VehicleRelatedRows <- uniquec[-1]
+VehicleRelatedSCC <- as.character(SCC[VehicleRelatedRows, "SCC"])
+
+
+BalLACVehicleRelatedEmissions <- BalLACEmissions[BalLACEmissions$SCC %in% VehicleRelatedSCC,]
+
+BalLACVehicleRelatedEmissions[BalLACVehicleRelatedEmissions$fips == "06037","City"] <- "Los Angeles"
+BalLACVehicleRelatedEmissions[BalLACVehicleRelatedEmissions$fips == "24510","City"] <- "Baltimore"
+
+BalLACVehicleRelatedEmSum <- aggregate(BalLACVehicleRelatedEmissions["Emissions"],
+                                 list(year = BalLACVehicleRelatedEmissions$year,
+                                      city = BalLACVehicleRelatedEmissions$City),
+                                 sum)
+
+
+
+ggplot(BalLACVehicleRelatedEmSum, aes(year, Emissions, label = round(Emissions, digits = 0), colour = city))+
+  geom_point(alpha = 0.4, color = "Black")+
+  geom_line(alpha = 0.7)+
+  geom_text(check_overlap = TRUE, vjust = 1.5, hjust = 0.4)+
+  xlab("Year")+
+  ylab("Coal related PM2.5 emissions [tons]")+
+  ggtitle("Total PM2.5 Vehicle-related emissions,\nBaltimore city vs Los Angeles County., 1999-2008")
+```
