@@ -105,3 +105,16 @@ warpbreaks$replicate <- rep(1:9, len = 54)
 xt <- xtabs(breaks ~ ., data = warpbreaks)
 ftable(xt)
 ```
+
+
+
+##For a general solution that works regardless of how many digits are in data$anim, use the sprintf function. It works like this:
+
+```{R}
+sprintf("%04d", 1)
+# [1] "0001"
+sprintf("%04d", 104)
+# [1] "0104"
+sprintf("%010d", 104)
+# [1] "0000000104"
+```
