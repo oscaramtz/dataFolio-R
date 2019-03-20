@@ -108,8 +108,7 @@ ftable(xt)
 
 
 
-##For a general solution that works regardless of how many digits are in data$anim, use the sprintf function. It works like this:
-
+## For a general solution that works regardless of how many digits, use the sprintf function.
 ```{R}
 sprintf("%04d", 1)
 # [1] "0001"
