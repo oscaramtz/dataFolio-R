@@ -1,0 +1,235 @@
+---
+title: "Economic and Public Health impact of catastrophic weather events in the United States 1950 - 2011"
+author: "Oscar A. Martinez \n (Assignment 2)"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+To carry out this analysis, the data from storms that occurred in the territory of the United States, published by the National Oceanic and Admospheric Administration <b>(NOAA)</b>, were taken as a reference. 
+
+You can download the file from the course web site: [Storm Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+
+There is also some documentation of the database available.
+
+National Weather Service [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+
+## Data Processing
+```{R}
+url <- ("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2")
+if(!file.exists("./data/StormData.csv.bz2")){
+    download.file(url,
+                  "./data/StormData.csv.bz2")}
+StormData <- read.csv("./data/StormData.csv.bz2")
+```
+
+
+### Taking a quick glance of the data.frame object
+
+As we can see, the dimensions of the data set had 37 variables, but we will just need the variables related to the damage measures in health damages (Fatalities and Injuries) and crop and property damage.
+
+```{r, echo=TRUE, results='asis'}
+
+dim(StormData)
+
+names(StormData)
+```
+
+```{r}
+keep <- c("STATE", "EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP",  "CROPDMG", "CROPDMGEXP")
+
+StormDataSelected <- StormData[, keep]
+
+```
+
+Taking a quick glance of the data set selection
+```{r, echo=FALSE, results='asis'}
+names(StormDataSelected)[1] <- c("state")
+knitr::kable(head(StormDataSelected, 5))
+library(cowplot)
+library(usmap)
+library(ggplot2)
+```
+
+
+
+Formatting property damage exponential values
+```{r}
+levels(StormDataSelected$PROPDMGEXP)
+StormDataSelected$PROPDMGEXP <- as.vector(StormDataSelected$PROPDMGEXP)
+StormDataSelected$PROPDMGEXP[StormDataSelected$PROPDMGEXP %in% c("","+","-","?")] <- "1"
+StormDataSelected$PROPDMGEXP[StormDataSelected$PROPDMGEXP == "h" | StormDataSelected$PROPDMGEXP == "H"] <- "2"
+StormDataSelected$PROPDMGEXP[StormDataSelected$PROPDMGEXP == "m" | StormDataSelected$PROPDMGEXP == "M"] <- "6"
+StormDataSelected$PROPDMGEXP[StormDataSelected$PROPDMGEXP == "K"] <- "3"
+StormDataSelected$PROPDMGEXP[StormDataSelected$PROPDMGEXP == "B"] <- "9"
+
+StormDataSelected$PROPDMGEXP <- as.numeric(StormDataSelected$PROPDMGEXP)
+
+unique(StormDataSelected$PROPDMGEXP)
+StormDataSelected$PropetyDMG <- StormDataSelected$PROPDMG*10^StormDataSelected$PROPDMGEXP
+```
+formatting Crop damage exponential values
+```{r}
+levels(StormDataSelected$CROPDMGEXP)
+
+StormDataSelected$CROPDMGEXP <- as.vector(StormDataSelected$CROPDMGEXP)
+StormDataSelected$CROPDMGEXP[StormDataSelected$CROPDMGEXP  %in% c("","+","-","?")] <- "1"
+StormDataSelected$CROPDMGEXP[StormDataSelected$CROPDMGEXP == "m" | StormDataSelected$CROPDMGEXP == "M"] <- "6"
+StormDataSelected$CROPDMGEXP[StormDataSelected$CROPDMGEXP == "k" | StormDataSelected$CROPDMGEXP == "K"] <- "3"
+StormDataSelected$CROPDMGEXP[StormDataSelected$CROPDMGEXP == "B"] <- "9"
+StormDataSelected$CROPDMGEXP <- as.numeric(StormDataSelected$CROPDMGEXP)
+
+unique(StormDataSelected$PROPDMGEXP)
+StormDataSelected$CropDMG <- StormDataSelected$CROPDMG*10^StormDataSelected$CROPDMGEXP
+```
+
+## Setting up summary tables
+
+<details>
+  <summary><code>Code for summary tables</code></summary>
+  
+```{r}
+## summary tables
+FatalitiesEvent <- aggregate(FATALITIES~EVTYPE, StormDataSelected[StormDataSelected$FATALITIES > 0,], sum)
+InjuriesEvent <- aggregate(INJURIES~EVTYPE, StormDataSelected[StormDataSelected$INJURIES > 0,], sum)
+PropCost <- aggregate(PropetyDMG~EVTYPE, StormDataSelected[StormDataSelected$PropetyDMG > 0,], sum)
+CropCost <- aggregate(CropDMG~EVTYPE, StormDataSelected[StormDataSelected$CropDMG > 0,], sum)
+StatePropCost <- aggregate(PropetyDMG~state, StormDataSelected[StormDataSelected$PropetyDMG > 0,], sum)
+StateCropCost <- aggregate(CropDMG~state, StormDataSelected[StormDataSelected$CropDMG > 0,], sum)
+StatePropCost$PropetyDMGMillions <- StatePropCost$PropetyDMG/1000000
+StateCropCost$CropDMGMillions <- StateCropCost$CropDMG/1000000
+
+
+
+
+## ordering decreasing total by event
+FatalitiesEvent <- FatalitiesEvent[order(FatalitiesEvent$FATALITIES, decreasing = T),]
+InjuriesEvent <- InjuriesEvent[order(InjuriesEvent$INJURIES, decreasing = T),]
+PropCost <- PropCost[order(PropCost$PropetyDMG, decreasing = T),]
+CropCost <- CropCost[order(CropCost$CropDMG, decreasing = T),]
+StatePropCost <- StatePropCost[order(StatePropCost$PropetyDMG, decreasing = T),]
+StateCropCost <- StateCropCost[order(StateCropCost$CropDMG, decreasing = T),]
+## summary tables for state plotings
+
+```
+</details><br>
+
+
+## Results
+
+### Health outcomes
+In the Fig. 1 we can see that through 61 years these are the 10 weather events that causes the mayor injury damage to the US population and they represent the `r scales::percent(sum(InjuriesEvent[1:10,2])/sum(InjuriesEvent[,2]))` of the total injuries. And as we can notice Tornadoes causes the `r scales::percent(sum(InjuriesEvent[1,2])/sum(InjuriesEvent[,2]))` of the total injuries
+
+```{r, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+ggplot2::ggplot(InjuriesEvent[1:10,], aes(x = reorder(EVTYPE, -INJURIES), y = INJURIES)) +
+  geom_bar(stat = "identity", fill = viridis::cividis(10, direction = -1)) +
+  geom_text(aes(label=scales::comma(INJURIES)), vjust=-0.3, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Figure 1: Top 10 weather events with the major injuries causation, 1950-2011",
+       subtitle = "NOAA: US data",
+       y = "Total of injuries",
+       x = "Event type") +
+  scale_y_continuous(labels = scales::comma)
+```
+
+
+Fatality outcomes has resulted in `r scales::comma(sum(FatalitiesEvent[,2]))` deaths, and `r as.vector(FatalitiesEvent[1,1])` represents the `r scales::percent(sum(FatalitiesEvent[1,2])/sum(FatalitiesEvent[,2]))` of the all fatalities.
+
+
+```{r, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+ggplot2::ggplot(FatalitiesEvent[1:10,], aes(x = reorder(EVTYPE, -FATALITIES), y = FATALITIES)) +
+  geom_bar(stat = "identity", fill = viridis::cividis(10, direction = -1)) +
+  geom_text(aes(label=scales::comma(FATALITIES)), vjust=-0.3, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Figure 2: Top 10 weather events with the fatal outcome causation, 1950-2011",
+       subtitle = "NOAA: US data",
+       y = "Total of injuries",
+       x = "Event type") +
+  scale_y_continuous(labels = scales::comma)
+```
+
+
+Property and crop losses represent approximately  `r scales::dollar(sum(StatePropCost[,3])+sum(StateCropCost[,3]))`  millions of dollars in the US in a 61 years period, and `r as.vector(StatePropCost[1,1])` is the most afected state in properties losses with the amount of `r scales::dollar(as.vector(StatePropCost[1,3]))` millions of dollars. In other hand `r as.vector(StateCropCost[1,1])` is the most afected in crop losses with `r scales::dollar(as.vector(StateCropCost[1,3]))` millions.
+
+
+### Damages by state
+
+<details>
+  <summary><code>Code used for state map summaries</code></summary>
+```{r}
+StateFatalitiesEvent <- aggregate(FATALITIES~state, StormDataSelected[StormDataSelected$FATALITIES > 0,], sum)
+StateInjuriesEvent <- aggregate(INJURIES~state, StormDataSelected[StormDataSelected$INJURIES > 0,], sum)
+StatePropCost <- aggregate(PropetyDMG~state, StormDataSelected[StormDataSelected$PropetyDMG > 0,], sum)
+StateCropCost <- aggregate(CropDMG~state, StormDataSelected[StormDataSelected$CropDMG > 0,], sum)
+
+
+map1 <- usmap::plot_usmap(data = StateFatalitiesEvent, values = "FATALITIES", lines = "black") +
+  scale_fill_continuous(name = "Fatalities",type = "viridis") +
+  theme(legend.position = "right", plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Fatalities")
+
+map2 <- usmap::plot_usmap(data = StateInjuriesEvent, values = "INJURIES", lines = "black") +
+  scale_fill_continuous(name = "Injuries",type = "viridis") +
+  theme(legend.position = "right", plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Injuries")
+
+
+map3 <- usmap::plot_usmap(data = StatePropCost, values = "PropetyDMG", lines = "black") +
+  scale_fill_continuous(name = "Property cost",type = "viridis", label = scales::dollar) +
+  theme(legend.position = "right", plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Property cost")
+
+map4 <- usmap::plot_usmap(data = StateCropCost, values = "CropDMG", lines = "black") +
+  scale_fill_continuous(name = "",type = "viridis", label = scales::dollar) +
+  theme(legend.position = "right", plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Crop cost")
+
+# Combine plots ####
+title <- cowplot::ggdraw() +
+  draw_label("Figure 4: Summary of catastrophic weather events in the US, 1950 - 2011",
+             fontface = 'bold')
+
+maps <- plot_grid(
+  map1,
+  map2,
+  map3,
+  map4,
+  nrow = 2
+)
+```
+</details><br>
+
+```{r fig5, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+cowplot::plot_grid(title, maps, ncol = 1,rel_heights = c(0.1, 1))
+# Save plots ####
+# cowplot::ggsave("./data/maps.png", width = 18, height = 10, units = "in")
+```
+```{r echo=FALSE, eval=FALSE, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+ggplot(StatePropCost[1:10,], aes(x = reorder(`state`, -`PropetyDMGMillions`), y = `PropetyDMGMillions`)) +
+  geom_bar(stat = "identity", fill = viridis::cividis(10, direction = -1)) +
+  geom_text(aes(label=scales::dollar(PropetyDMGMillions)), vjust=-0.3, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Figure 3: Top 10 states with mayor properties cost, 1950-2011",
+       subtitle = "NOAA: US data",
+       y = "Total of millions",
+       x = "State") +
+  scale_y_continuous(labels = scales::dollar)
+
+ggplot(StateCropCost[1:10,], aes(x = reorder(`state`, -`CropDMGMillions`), y = `CropDMGMillions`)) +
+  geom_bar(stat = "identity", fill = viridis::cividis(10, direction = -1)) +
+  geom_text(aes(label=scales::dollar(CropDMGMillions)), vjust=-0.3, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Figure 4: Top 10 states with mayor crop losses, 1950-2011",
+       subtitle = "NOAA: US data",
+       y = "Total of millions",
+       x = "State") +
+  scale_y_continuous(labels = scales::dollar)
+```
