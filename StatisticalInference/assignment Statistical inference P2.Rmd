@@ -1,0 +1,91 @@
+---
+title: "Assignment Statistical Inference - Part 2"
+author: "OscarAMtz"
+date: "8 de abril de 2019"
+output:
+  pdf_document: default
+  geometry: margin=2cm
+  html_document:
+    df_print: paged
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Part 2
+##Exploratory data analyses in the native `ToothGrowth` database
+The data set ToothGrowth contains measurements on the effects on tooth length (len) based on varying dosages of vitamin C for a cohort of guinea
+pigs. [^1]
+
+[^1]: Crampton, E. W. (1947). The growth of the odontoblast of the incisor teeth as a criterion of vitamin C intake of the guinea pig. The Journal of Nutrition, 33(5), 491–504. doi: 10.1093/jn/33.5.491 The Effect of Vitamin C on Tooth Growth in Guinea Pigs https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html
+
+### Exploratory analysis
+```{r}
+data(ToothGrowth)
+str(ToothGrowth)
+summary(ToothGrowth)
+unique(ToothGrowth$supp)
+```
+
+T test aplied to Tooth length ~ Supplement used, separed by dosage
+
+```{r, echo = FALSE}
+dose0.5 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 0.5),])
+dose1 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 1),])
+dose2 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 2),])
+
+SummaryTStatistics <- data.frame(
+  "p-value" = c(dose0.5$p.value, dose1$p.value, dose2$p.value),
+  "CI95 low" = c(dose0.5$conf.int[1],dose1$conf.int[1], dose2$conf.int[1]),
+  "CI95 high" = c(dose0.5$conf.int[2],dose1$conf.int[2], dose2$conf.int[2]),
+  "Orange Juice mean" = c(dose0.5$estimate[[1]],dose1$estimate[[1]],dose2$estimate[[1]]),
+  'Vitamin C mean' = c(dose0.5$estimate[[2]],dose1$estimate[[2]],dose2$estimate[[2]]),
+  row.names = c("Dosage 0.5","Dosage 1","Dosage 2"))
+SummaryTStatistics
+```
+[See code here](#appendix-1)
+
+
+```{r, echo = FALSE, fig.width = 7, fig.asp = .62, fig.align = 'center'}
+library(ggplot2)
+ggplot(ToothGrowth, aes(factor(supp), len, fill = supp))+
+  geom_boxplot() +
+  facet_grid(.~dose) +
+  xlab("Supplement") +
+  ylab("Tooth length") +
+  ggtitle("Supplement by tooth length per dosage") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+```
+[See code here](#appendix-2)
+
+# Conclusion
+
+As we can se **Orange Juice** it is more efective for tooth growth in lower dose than the **Vitamin C** with a significative p-value < 0.05 and Confident intervals over 0.
+
+# Appendix
+
+## Appendix 1
+```{r, eval = FALSE}
+dose0.5 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 0.5),])
+dose1 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 1),])
+dose2 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 2),])
+
+SummaryTStatistics <- data.frame(
+  "p-value" = c(dose0.5$p.value, dose1$p.value, dose2$p.value),
+  "CI95 low" = c(dose0.5$conf.int[1],dose1$conf.int[1], dose2$conf.int[1]),
+  "CI95 high" = c(dose0.5$conf.int[2],dose1$conf.int[2], dose2$conf.int[2]),
+  "Orange Juice mean" = c(dose0.5$estimate[[1]],dose1$estimate[[1]],dose2$estimate[[1]]),
+  'Vitamin C mean' = c(dose0.5$estimate[[2]],dose1$estimate[[2]],dose2$estimate[[2]]),
+  row.names = c("Dosage 0.5","Dosage 1","Dosage 2"))
+SummaryTStatistics
+```
+
+## Apendix 2
+```{r, eval = FALSE, fig.width = 7, fig.asp = .62, fig.align = 'center'}
+ggplot2::ggplot(ToothGrowth, aes(factor(supp), len, fill = supp))+
+  geom_boxplot() +
+  facet_grid(.~dose) +
+  xlab("Supplement") +
+  ylab("Tooth length") +
+  ggtitle("Supplement by tooth length per dosage") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+```

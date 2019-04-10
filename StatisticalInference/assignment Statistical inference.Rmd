@@ -1,0 +1,136 @@
+---
+title: "Assignment Statistical Inference - Part 1"
+author: "OscarAMtz"
+date: "8 de abril de 2019"
+output:
+  pdf_document: default
+  geometry: margin=2cm
+  html_document:
+    df_print: paged
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Part 1
+1. A simulation exercise
+2. Basic inferential data analysis
+
+The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. You will investigate the distribution of averages of 40 exponentials. Note that you will need to do a thousand simulations.
+```{r}
+set.seed(215)
+lambda <- 0.2; obs <- 40; sims <- 1000 ## var simulations
+exp.sims <- NULL ## var used to store exponential simulations
+for (i in seq(sims)) exp.sims <- c(exp.sims, mean(rexp(obs, lambda)))
+exp.sims.mean <- mean(exp.sims)
+round(exp.sims.mean, 3)
+```
+The mean of the 1000 simulations is `r round(exp.sims.mean, 3)`, meanwhile the theorical mean is `r 1/lambda` and can be compared in the following histogram.
+```{r, echo = FALSE, fig.width = 7, fig.asp = .62, fig.align = 'center'}
+hist(exp.sims, breaks = 50, probability = F, 
+     main="1000 simulations of exponential distribution means", 
+     xlab="Spread")
+abline(v = 1/lambda, col= 3, lwd = 0.75)
+abline(v = exp.sims.mean, col = 2, lwd = 0.75)
+legend("topright", 
+       c(paste("Sample mean", 
+               round(exp.sims.mean, 3)), 
+         paste("Theoretical mean", 1/lambda)), 
+       bty = "n",  
+       lty = c(1,1), 
+       col = c(col = 3, col = 2))
+```
+[See code here](#appendix-1)
+
+## Distributions comparison
+Compare how variable the sample is vs the expected distribution via variance
+
+## Expected variance
+[See code here](#appendix-2)
+
+```{r, echo = FALSE}
+matrix(c(1/lambda, 
+         ((1/lambda)/sqrt(obs))^2, 
+         exp.sims.mean, 
+         var(exp.sims)), 
+       nrow = 2,  
+       dimnames = list(c("Mean", "Variance"), c("Expected", "Sample")))
+```
+## Showing distributions aproximately to the normal
+```{r, echo = FALSE, fig.width = 7, fig.asp = .62, fig.align = 'center'}
+set.seed(215)
+hist(exp.sims, breaks = 50, probability = T,  
+     main="1000 simulations of exponential distribution means", 
+     xlab="Spread")
+abline(v = 1/lambda,  col= 3, lwd = 0.75)
+abline(v = exp.sims.mean, col = 2, lwd = 0.75)
+legend("topright", 
+       c(paste("Sample mean", round(exp.sims.mean, 3)),
+         paste("Theoretical mean", 1/lambda)), 
+       bty = "n",  
+       lty = c(1,1),  
+       col = c(col = 3, col = 2))
+lines(density(exp.sims), col = 3)
+lines(density(rnorm(1000, 5,((1/lambda)/sqrt(obs)))), col = 2)
+```
+[See code here](#appendix-3)
+
+## Normal distribution aproximation
+```{r,fig.width = 7, fig.asp = .62, fig.align = 'center'}
+qqnorm(exp.sims)
+qqline(exp.sims)
+```
+
+
+# Appendix
+
+## Appendix 1
+Code used in plot 1
+
+<a id="Annex1"></a>
+```{r, eval = FALSE, fig.width = 7, fig.asp = .62, fig.align = 'center'}
+hist(exp.sims, breaks = 50, probability = F, 
+     main="1000 simulations of exponential distribution means", 
+     xlab="Spread")
+abline(v = 1/lambda, col= 3, lwd = 0.75)
+abline(v = exp.sims.mean, col = 2, lwd = 0.75)
+legend("topright", 
+       c(paste("Sample mean", 
+               round(exp.sims.mean, 3)), 
+         paste("Theoretical mean", 1/lambda)), 
+       bty = "n",  
+       lty = c(1,1), 
+       col = c(col = 3, col = 2))
+```
+
+
+## Appendix 2
+Code used in plot 2
+
+```{r, eval = FALSE, fig.width = 7, fig.asp = .62, fig.align = 'center'}
+set.seed(215)
+hist(exp.sims, breaks = 50, probability = T,  
+     main="1000 simulations of exponential distribution means", 
+     xlab="Spread")
+abline(v = 1/lambda,  col= 3, lwd = 0.75)
+abline(v = exp.sims.mean, col = 2, lwd = 0.75)
+legend("topright", 
+       c(paste("Sample mean", round(exp.sims.mean, 3)),
+         paste("Theoretical mean", 1/lambda)), 
+       bty = "n",  
+       lty = c(1,1),  
+       col = c(col = 3, col = 2))
+lines(density(exp.sims), col = 3)
+lines(density(rnorm(1000, 5,((1/lambda)/sqrt(obs)))), col = 2)
+```
+
+## Appendix 3
+Code used for the matrix
+
+```{r, eval = FALSE}
+matrix(c(1/lambda, 
+         ((1/lambda)/sqrt(obs))^2, 
+         exp.sims.mean, 
+         var(exp.sims)), 
+       nrow = 2,  
+       dimnames = list(c("Mean", "Variance"), c("Expected", "Sample")))
+```

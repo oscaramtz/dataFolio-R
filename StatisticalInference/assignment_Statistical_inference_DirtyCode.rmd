@@ -1,0 +1,41 @@
+unique(as.factor(ToothGrowth$supp))
+levels(ToothGrowth$supp) <- c("Orange juice", "Vitamin C")
+str(ToothGrowth)
+
+
+tapply(ToothGrowth$len, ToothGrowth$supp, FUN=summary)
+
+library(ggplot2)
+
+BoxplotPigs<- ggplot(ToothGrowth, aes(factor(dose), len, fill = supp))+
+  geom_boxplot() +
+  facet_grid(.~supp) +
+  xlab("Dose") +
+  ylab("Tooth length") +
+  ggtitle("Supplement dose by tooth length")
+
+BoxplotPigs
+
+ggplot(ToothGrowth, aes(factor(supp), len, fill = supp))+
+  geom_boxplot() +
+  facet_grid(.~dose) +
+  xlab("Supplement") +
+  ylab("Tooth length") +
+  ggtitle("Supplement by tooth length per dosage") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+dose0.5 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 0.5),])
+dose1 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 1),])
+dose2 <- t.test(len ~ supp, ToothGrowth[(ToothGrowth$dose == 2),])
+
+SummaryTStatistics <- data.frame(
+  "p-value" = c(dose0.5$p.value, dose1$p.value, dose2$p.value),
+  "CI95 low" = c(dose0.5$conf.int[1],dose1$conf.int[1], dose2$conf.int[1]),
+  "CI95 high" = c(dose0.5$conf.int[2],dose1$conf.int[2], dose2$conf.int[2]),
+  "Orange Juice mean" = c(dose0.5$estimate[[1]],dose1$estimate[[1]],dose2$estimate[[1]]),
+  'Vitamin C mean' = c(dose0.5$estimate[[2]],dose1$estimate[[2]],dose2$estimate[[2]]),
+  row.names = c("Dosage 0.5","Dosage 1","Dosage 2"))
+SummaryTStatistics
+
+
+c(dose0.5$p.value, dose1$p.value, dose2$p.value)
