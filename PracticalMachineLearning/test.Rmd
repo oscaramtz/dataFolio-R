@@ -1,0 +1,230 @@
+---
+title: "PracticalMachineLearning -Course project-"
+author: "OscarAMtz"
+date: "13/4/2020"
+output: html_document
+---
+
+```{r setup, results='hide'}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## Background for this tutorial
+
+
+The use of devices for activity monitoring is widely accepted among people and nowadays is possible to collect a large amount of data about personal activity relatively inexpensively.
+These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.
+In this tutorial we will be able to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. 
+More information is available from the [website](http://groupware.les.inf.puc-rio.br/har)
+
+## Data
+
+The data used for this proyect can be found here:
+
+[Training](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)
+
+[Testing](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)
+
+[More info](http://groupware.les.inf.puc-rio.br/har)
+
+Downloading the data
+```{r}
+TrainingDT <- tidyr::as_tibble(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")))
+TestingDT <- tidyr::as_tibble(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")))
+```
+
+## Database description
+
+The resulting model will be tested in the pml_testing file and by exploring this file we can identify that there are variables without variation and with the absence of data, these variables will not be useful when predicting the type of movement given the value of the independent variables.
+
+```{r}
+# Testing dimensions
+dim(TestingDT)
+head(TestingDT, 5)
+
+# Training dimensions
+dim(TrainingDT)
+head(TrainingDT, 5)
+```
+
+We can verify the variables that have absence of data
+
+```{r}
+# Every 20 is the total absence of data
+as.matrix(sapply(TestingDT, function(x) sum(is.na(x))))
+```
+
+A total of `r length(which(as.matrix(sapply(TestingDT, function(x) sum(is.na(x))) == nrow(TestingDT))))` columns without useful data
+
+## Clean the data
+Cleaning the database from non useful columns
+```{r}
+NA_cols <- which(as.matrix(sapply(TestingDT, 
+                                  function(x) sum(is.na(x))) == nrow(TestingDT)))
+
+TestingDT <- TestingDT[,-NA_cols] 
+TrainingDT <- TrainingDT[,-NA_cols]
+```
+
+Also, there are some columns with timestamps and identifiers that are not useful at all for this exercise
+
+```{r}
+TestingDT <- TestingDT[,8:60] 
+TrainingDT <- TrainingDT[,8:60]
+```
+
+### High correlated variables - featuring variable selection
+In the data we have some variables highly correlated that can add some noise to the training process for each model, so will try to cleaning.
+
+```{r, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+corrplot::corrplot(cor(TrainingDT[,1:52]),  type = "upper", tl.pos = "td",method = "circle", tl.cex = 0.5, tl.col = 'black',order = "hclust", diag = FALSE)
+```
+
+Doing the cleaning of variables correlated above 75%
+```{r}
+highcorr <- caret::findCorrelation(cor(TrainingDT[,1:52]), cutoff=0.75)
+length(highcorr)
+TrainingDT <- TrainingDT[,-highcorr]
+TestingDT <- TestingDT[,-highcorr]
+
+dim(TrainingDT)
+```
+
+
+## Training and testing DB
+To performe this exercise we need to take the training data and split it into testing and training, we will performe three distinct models from the less compute demanding to the highest. The first model that it will we fitted is decision tree algorithm.
+
+```{r}
+trnrows <- as.vector(caret::createDataPartition(TrainingDT$classe, 
+                                                p = 0.7, 
+                                                list = F))
+training <-  TrainingDT[trnrows,]
+testing <- TrainingDT[-trnrows,]
+
+## Control for all the models
+
+control <- caret::trainControl(method = "repeatedcv",
+                        number = 5,
+                        repeats = 5,
+                        summaryFunction = caret::multiClassSummary,
+                        classProbs = TRUE)
+```
+
+## LM - Decision tree
+
+```{r, echo=FALSE}
+cores <- 8
+library(doParallel)
+cl<- parallel::makePSOCKcluster(cores)
+doParallel::registerDoParallel(cl)
+```
+
+```{r warning=FALSE}
+set.seed(123)
+modDT <- caret::train(classe ~ .,
+               method = "rpart",
+               data = training,
+               tuneLength = 50,
+               metric = "Accuracy",
+               trControl = control)
+predDT <- predict(modDT, testing)
+
+caret::confusionMatrix(testing$classe, predDT)
+```
+
+### Decision tree accuracy
+Decision tree has an accuracy `r scales::percent(caret::confusionMatrix(testing$classe, predDT)$overall[['Accuracy']],accuracy = 0.0001)` with a CI - 95% between `r scales::percent(caret::confusionMatrix(testing$classe, predDT)$overall[['AccuracyLower']],accuracy = 0.001)` and `r scales::percent(caret::confusionMatrix(testing$classe, predDT)$overall[['AccuracyUpper']],accuracy = 0.001)`.
+````{r}
+round(caret::confusionMatrix(testing$classe, predDT)$overall, 4)
+```
+### Visualil decision tree
+With 52 predictors the decision tree seems a mess, but we can hava a glance of the complexity of the model. 
+```{r, warning=F, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+# I shut down the warnings because we will have overplotting
+rpart.plot::rpart.plot(modDT$finalModel)
+```
+
+
+## Gradient Boosting Model
+
+```{r}
+set.seed(123)
+modGBM <- caret::train(classe~., 
+                       training, 
+                       method = "gbm", 
+                       trControl = control, 
+                       verbose = F)
+predGBM <- predict(modGBM, testing)
+caret::confusionMatrix(testing$classe, predGBM)
+```
+
+### Gradient Boosting model accuracy
+Gradient boosting model has an accuracy `r scales::percent(caret::confusionMatrix(testing$classe, predGBM)$overall[['Accuracy']],accuracy = 0.0001)` with a CI - 95% between `r scales::percent(caret::confusionMatrix(testing$classe, predGBM)$overall[['AccuracyLower']],accuracy = 0.001)` and `r scales::percent(caret::confusionMatrix(testing$classe, predGBM)$overall[['AccuracyUpper']],accuracy = 0.001)`.
+
+````{r}
+round(caret::confusionMatrix(testing$classe, predGBM)$overall, 4)
+```
+
+### GBM Plot
+
+```{r, warning=F, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+plot(caret::confusionMatrix(testing$classe, predGBM)$table,
+     main = paste("Gradient Boosting - Accuracy Level =",
+                  scales::percent(caret::confusionMatrix(testing$classe, predGBM)$overall[['Accuracy']],accuracy = 0.01)))
+```
+
+## Random forests modeling
+
+You can also embed plots, for example:
+
+```{r}
+cores <- 8
+library(doParallel)
+cl<- parallel::makePSOCKcluster(cores)
+doParallel::registerDoParallel(cl)
+modRF <- caret::train(classe ~., 
+               method='parRF', 
+               data=training, 
+               controRF = control, 
+               verboseIter = F)
+
+parallel::stopCluster(cl)
+predRF <- predict(modRF, testing)
+caret::confusionMatrix(testing$classe, predRF)
+```
+
+### Random Forest accuracy
+Random Forest has an accuracy `r scales::percent(caret::confusionMatrix(testing$classe, predRF)$overall[['Accuracy']],accuracy = 0.0001)` with a CI - 95% between `r scales::percent(caret::confusionMatrix(testing$classe, predRF)$overall[['AccuracyLower']],accuracy = 0.001)` and `r scales::percent(caret::confusionMatrix(testing$classe, predRF)$overall[['AccuracyUpper']],accuracy = 0.001)`.
+
+````{r}
+round(caret::confusionMatrix(testing$classe, predGBM)$overall, 4)
+```
+
+### Random Forest Plot
+
+```{r, warning=F, fig.width = 10, fig.asp = .62, fig.align = 'center'}
+plot(caret::confusionMatrix(testing$classe, predRF)$table,
+     main = paste("Random Forest - Accuracy Level =",
+                  scales::percent(caret::confusionMatrix(testing$classe, predRF)$overall[['Accuracy']],accuracy = 0.01)))
+```
+
+# Prediction
+
+In this step we will use the model with the best accuracy
+
+```{r}
+predict(modRF, TestingDT)
+```
+
+# Conclusion
+
+We had calculated different models to predict the kind of activity from given variables values and we can compare their accuracy in the following matrix
+
+```{r, echo=FALSE, results='asis'}
+Comparinson <- data.frame()
+Comparinson<- cbind(caret::confusionMatrix(testing$classe, predDT)$overall[c(3,1,4,2)],
+       caret::confusionMatrix(testing$classe, predGBM)$overall[c(3,1,4,2)],
+       caret::confusionMatrix(testing$classe, predRF)$overall[c(3,1,4,2)])
+colnames(Comparinson)<- c("Decision Tree", "Gradient Boosting", "Random Forest")
+knitr::kable(round(Comparinson,3))
+```
